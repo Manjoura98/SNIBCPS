@@ -1,0 +1,15 @@
+Once the first script is ran.
+
+1 - There will be some changes to the script scr.sh, open it by:
+    $nano scr.sh
+2- Modify line 10: #sbatch --mail-user=your@email
+                                                                          ___________________            _________________
+3- Modify the overlined lines starting with: bash SEACR_1.3.sh ./BedGrphs/CHD3_2_E15.BEDgraph ./BedGrphs/IgG2_E15.BEDgraph non stringent output
+ (Input your desired bedgraph files)
+
+4[[[[-Beforehand, CutAndRun scripts have to be run to trim(Trimmomatic) and QC(FastQC) and align (Bowtie2), convert from bam to Bedgraph(bedtools)]]]]
+   P.S: I already generated my bedgraph files, a short script for step number 4 will be added in the upcoming days
+
+5-Close the script ctrl+x, type in y, and click enter.
+6-Run the script:
+  $sbatch scr.sh
