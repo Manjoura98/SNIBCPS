@@ -1,1 +1,72 @@
+SNIBCPS pipeline
 
+RNA-seq data processing:
+------------------------
+1- Log in to Narval Compute Canada
+2- Type in the following command:
+      $cd /home/mehdim98/projects/def-pcampeau/mehdim98/RNAseqBam/ENV
+3- There are few things to modify in deg.sh script, type in the following command to modify:
+      $nano deg.sh
+4- Modify line number 13 starting with #SBATCH --mail-user=your@email
+   Then close the script, by ctrl+x, type in y and click enter.
+5- Download your FASTQ files from NANUQ. Move them to Compute canada by issuing the following command:
+      $scp -r /path/to/your/folder/containing/the/rawreads mehdim98@narval.computecanada.ca:/home/mehdim98/projects/def-pcampeau/mehdim98/RNAseqBam/ENV/
+6- Name the folder containing the reads as follow:
+      $mv nameofthefolder reads
+7-    $cd reads
+      
+   #As we are working with pair-ended reads, for each sample, there is a forward and reverse file inside a folder inside the reads folder.
+   # This a representation:
+      reads|
+           |___ NS********R1.fastq.gz(forwardfile) & NS********R2.fastq.gz(reversefile) (sample1)
+           |____NS********R1.fastq.gz(forwardfile) & NS********R2.fastq.gz(reversefile) (sample2) and so on ....
+
+8-Issue the following command for each pair of file per sample: if you have 6 samples, the renaming goes from poolA.....fastq.gz to poolF....fastq.gz
+   From sample 1 to 6:
+       $mv NS********R1.fastq.gz poolA_R1.fastq.gz
+       $mv NS********R1.fastq.gz poolA_R2.fastq.gz 
+         .....
+       $mv NS********R1.fastq.gz poolF_R1.fastq.gz
+       $mv NS********R1.fastq.gz poolF_R2.fastq.gz
+9- If you named your samples correctly (alphabetically ascending).you should remove or add +/- 4xN lines in the script. (to open the script: $nano deg.sh)
+   if you have 4 you will have 16 lines: 4x(N samples), so you will have to remove the last 8 lines
+   Lets say you have 6 samples: you will have 24 lines as follow:
+       cd ./poolA
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolA/poolA_R1.fastq ./poolA/poolA_R2.fastq --outFileNamePrefix poolA --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+       cd ./poolB
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolB/poolB_R1.fastq ./poolB/poolB_R2.fastq --outFileNamePrefix poolB --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+       cd ./poolC
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolC/poolC_R1.fastq ./poolC/poolC_R2.fastq --outFileNamePrefix poolC --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+       cd ./poolD
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolD/poolD_R1.fastq ./poolD/poolD_R2.fastq --outFileNamePrefix poolD --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+       cd ./poolE
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolE/poolE_R1.fastq ./poolE/poolE_R2.fastq --outFileNamePrefix poolE --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+       cd ./poolF
+       gunzip *.gz
+       cd ..
+       STAR --genomeDir ./indexGenRef/ --runThreadN 8 --readFilesIn ./poolF/poolF_R1.fastq ./poolF/poolF_R2.fastq --outFileNamePrefix poolF --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard --outFilterMultimapNmax 100 --winAnchorMultimapNmax 100
+
+10- You must know which of your samples are mutant and which are wildtype, you will need to modify the last line of the script as follow:
+
+-t: mutant sample
+-c: wildtype
+You just need to modify this:                      |                                  |                                  |                                     |                                  |                                  |                                                                             
+     TEtranscripts --sortByPos --mode multi -t poolBAligned.sortedByCoord.out.bam poolDAligned.sortedByCoord.out.bam poolFAligned.sortedByCoord.out.bam -c poolAAligned.sortedByCoord.out.bam poolCAligned.sortedByCoord.out.bam poolEAligned.sortedByCoord.out.bam --GTF mm10.refGene.gtf --TE mm10_rmsk_TE.gtf
+ 11- Close the script by ctrl+x, type in y and click enter.
+ 12- To run the script: $sbatch deg.sh
+
+
+
+
+Reference for my TEtranscripts usage:
+Jin Y, Tam OH, Paniagua E, Hammell M. (2015) TEtranscripts: a package for including transposable elements in differential expression analysis of RNA-seq datasets. Bioinformatics. 31(22):3593-9.
